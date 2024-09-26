@@ -1,4 +1,4 @@
-package tab
+package tabs
 
 import tea "github.com/charmbracelet/bubbletea"
 
