@@ -26,6 +26,20 @@ func initialHomeModel() homeModel {
 	}
 }
 
+type SessionState struct {
+	WorkingDir     string
+	OutputFileName string
+	OutputDirName  string
+	FullOutputPath string
+}
+
+func (m homeModel) updateSessionState(state SessionState) SessionState {
+	state.WorkingDir = m.projectNameInput.Value()
+	state.OutputFileName = m.outputFileInput.Value()
+	state.FullOutputPath = fmt.Sprintf("%s/data/%s/%s", state.WorkingDir, state.OutputDirName, state.OutputFileName)
+	return state
+}
+
 func (m homeModel) Init() tea.Cmd {
 	return textinput.Blink
 }

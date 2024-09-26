@@ -10,31 +10,24 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-    "github.com/vidyasagar0405/go-varcall/tabs"
+	"gituhb.com/vidyasagar0450/go-varcall/tabs"
 )
 
 type errMsg error
 
 type model struct {
-	samtoolsTabModel samtoolsModel
-	bcftoolsTabModel bcftoolsModel
+	samtoolsTabModel *tabs.samtoolsModel
+	bcftoolsTabModel *tabs.bcftoolsModel
 	help             help.Model
 	err              error
-	helpTabModel     helpModel
-	state            SessionState
+	helpTabModel     *tabs.helpModel
+	state            *tabs.SessionState
 	Keys             KeyMap
 	tabs             []string
-	homeTabModel     homeModel
+	homeTabModel     *tabs.homeModel
 	textInput        textinput.Model
 	spinner          spinner.Model
 	activeTab        int
-}
-
-type SessionState struct {
-	WorkingDir     string
-	OutputFileName string
-	OutputDirName  string
-	FullOutputPath string
 }
 
 func initialModel() model {
@@ -44,15 +37,15 @@ func initialModel() model {
 	return model{
 		Keys:    Keys,
 		help:    help.New(),
-		state:   SessionState{},
+		state:   *tabs.SessionState{},
 		spinner: s,
 
 		tabs:             []string{"Home", "Samtools", "Bcftools", "Help"},
 		activeTab:        0,
-		homeTabModel:     initialHomeModel(),
-		samtoolsTabModel: initialSamtoolsModel(),
-		bcftoolsTabModel: initialBcftoolsModel(),
-		helpTabModel:     initialHelpModel(),
+		homeTabModel:     *tabs.initialHomeModel(),
+		samtoolsTabModel: *tabs.initialSamtoolsModel(),
+		bcftoolsTabModel: *tabs.initialBcftoolsModel(),
+		helpTabModel:     *tabs.initialHelpModel(),
 	}
 }
 
@@ -66,13 +59,6 @@ func (m model) tabView() string {
 		tabViews = append(tabViews, style.Render(tab))
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Left, tabViews...)
-}
-
-func (m homeModel) updateSessionState(state SessionState) SessionState {
-	state.WorkingDir = m.projectNameInput.Value()
-	state.OutputFileName = m.outputFileInput.Value()
-	state.FullOutputPath = fmt.Sprintf("%s/data/%s/%s", state.WorkingDir, state.OutputDirName, state.OutputFileName)
-	return state
 }
 
 func (m model) Init() tea.Cmd {

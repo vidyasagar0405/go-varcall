@@ -1,4 +1,4 @@
-module go-varcall
+module github.com/vidyasagar0405/go-varcall
 
 go 1.21
 

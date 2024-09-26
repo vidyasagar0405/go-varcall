@@ -14,7 +14,7 @@ type helpModel struct {
 
 func (hm helpModel) New() helpModel {
 	markdownModel := markdown.New(true, false, lipgloss.AdaptiveColor{Light: "#0000ff", Dark: "#000099"})
-	markdownModel.FileName = "./README.md"
+	markdownModel.FileName = "../README.md"
 
 	return helpModel{
 		markdown: markdownModel,
