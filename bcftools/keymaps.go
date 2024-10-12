@@ -1,4 +1,4 @@
-package main
+package bcftools
 
 import "github.com/charmbracelet/bubbles/key"
 
