@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/vidyasagar0405/go-varcall/bcftools"
@@ -20,6 +21,7 @@ type mainModel struct {
 	bcftoolsTabModel bcftools.Model
 	helpTabModel     helptab.Model
 	keys             keymaps
+	help             help.Model
 }
 
 func initialMainModel() mainModel {
@@ -29,8 +31,9 @@ func initialMainModel() mainModel {
 		homeTabModel:     home.InitialModel(),
 		samtoolsTabModel: samtools.InitialModel(),
 		bcftoolsTabModel: bcftools.InitialModel(),
-        helpTabModel: helptab.InitialModel(),
+		helpTabModel:     helptab.InitialModel(),
 		keys:             Keys,
+		help:             help.New(),
 	}
 }
 
@@ -56,6 +59,21 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	var updatedModel tea.Model
+	switch m.activeTab {
+	case 0:
+		updatedModel, cmd = m.homeTabModel.Update(msg)
+		m.homeTabModel = updatedModel.(home.Model)
+	case 1:
+		updatedModel, cmd = m.samtoolsTabModel.Update(msg)
+		m.samtoolsTabModel = updatedModel.(samtools.Model)
+	case 2:
+		updatedModel, cmd = m.bcftoolsTabModel.Update(msg)
+		m.bcftoolsTabModel = updatedModel.(bcftools.Model)
+	case 3:
+		updatedModel, cmd = m.helpTabModel.Update(msg)
+		m.helpTabModel = updatedModel.(helptab.Model)
+	}
 	return m, cmd
 }
 
@@ -64,6 +82,20 @@ func (m mainModel) View() string {
 	displayString := "\n"
 
 	displayString += m.tabView()
+
+	var tabContent string
+	switch m.activeTab {
+	case 0:
+		tabContent = m.homeTabModel.View()
+	case 1:
+		tabContent = m.samtoolsTabModel.View()
+	case 2:
+		tabContent = m.bcftoolsTabModel.View()
+	case 3:
+		tabContent = m.homeTabModel.View()
+	}
+	helpView := m.help.View(m.keys)
+	displayString += fmt.Sprintf("\n\n%s\n\n%v", tabContent, helpView)
 
 	return displayString
 }
