@@ -10,21 +10,21 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"gituhb.com/vidyasagar0450/go-varcall/tabs"
+	"github.com/vidyasagar0405/go-varcall/tabs"
 )
 
 type errMsg error
 
 type model struct {
-	samtoolsTabModel *tabs.samtoolsModel
-	bcftoolsTabModel *tabs.bcftoolsModel
+	samtoolsTabModel tabs.SamtoolsModel
+	bcftoolsTabModel tabs.BcftoolsModel
 	help             help.Model
 	err              error
-	helpTabModel     *tabs.helpModel
-	state            *tabs.SessionState
+	helpTabModel     tabs.HelpModel
+	state            tabs.SessionState
 	Keys             KeyMap
 	tabs             []string
-	homeTabModel     *tabs.homeModel
+	homeTabModel     tabs.HomeModel
 	textInput        textinput.Model
 	spinner          spinner.Model
 	activeTab        int
@@ -35,17 +35,18 @@ func initialModel() model {
 	s.Spinner = spinner.Points
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	return model{
-		Keys:    Keys,
-		help:    help.New(),
-		state:   *tabs.SessionState{},
-		spinner: s,
-
+		samtoolsTabModel: tabs.InitialSamtoolsModel(),
+		bcftoolsTabModel: tabs.InitialBcftoolsModel(),
+		help:             help.New(),
+		err:              nil,
+		helpTabModel:     tabs.InitialHelpModel(),
+		state:            tabs.SessionState{},
+		Keys:             Keys,
 		tabs:             []string{"Home", "Samtools", "Bcftools", "Help"},
+		homeTabModel:     tabs.InitialHomeModel(),
+		textInput:        textinput.Model{},
+		spinner:          s,
 		activeTab:        0,
-		homeTabModel:     *tabs.initialHomeModel(),
-		samtoolsTabModel: *tabs.initialSamtoolsModel(),
-		bcftoolsTabModel: *tabs.initialBcftoolsModel(),
-		helpTabModel:     *tabs.initialHelpModel(),
 	}
 }
 
@@ -91,7 +92,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.activeTab {
 	case 0:
 		m.homeTabModel, cmd = m.homeTabModel.Update(msg)
-		m.state = m.homeTabModel.updateSessionState(m.state)
+		m.state = m.homeTabModel.UpdateSessionState(m.state)
 	case 1:
 		m.samtoolsTabModel, cmd = m.samtoolsTabModel.Update(msg)
 	case 2:

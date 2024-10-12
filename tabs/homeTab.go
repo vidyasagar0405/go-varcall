@@ -7,22 +7,24 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type homeModel struct {
-	projectNameInput textinput.Model
-	outputFileInput  textinput.Model
+type HomeModel struct {
+	err           error
+	projectNameIn textinput.Model
+	outputFileIn  textinput.Model
 }
 
-func initialHomeModel() homeModel {
-	projectNameInput := textinput.New()
-	projectNameInput.Placeholder = "Enter project name"
-	projectNameInput.Focus()
+func InitialHomeModel() HomeModel {
+	projectNameIn := textinput.New()
+	projectNameIn.Placeholder = "Enter project name"
+	projectNameIn.Focus()
 
-	outputFileInput := textinput.New()
-	outputFileInput.Placeholder = "Enter output file name"
+	inputFileIn := textinput.New()
+	inputFileIn.Placeholder = "Enter output file name"
 
-	return homeModel{
-		projectNameInput: projectNameInput,
-		outputFileInput:  outputFileInput,
+	return HomeModel{
+		projectNameIn: projectNameIn,
+		outputFileIn:  inputFileIn,
+		err:           nil,
 	}
 }
 
@@ -33,44 +35,44 @@ type SessionState struct {
 	FullOutputPath string
 }
 
-func (m homeModel) updateSessionState(state SessionState) SessionState {
-	state.WorkingDir = m.projectNameInput.Value()
-	state.OutputFileName = m.outputFileInput.Value()
+func (m HomeModel) UpdateSessionState(state SessionState) SessionState {
+	state.WorkingDir = m.projectNameIn.Value()
+	state.OutputFileName = m.outputFileIn.Value()
 	state.FullOutputPath = fmt.Sprintf("%s/data/%s/%s", state.WorkingDir, state.OutputDirName, state.OutputFileName)
 	return state
 }
 
-func (m homeModel) Init() tea.Cmd {
+func (m HomeModel) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m homeModel) Update(msg tea.Msg) (homeModel, tea.Cmd) {
+func (m HomeModel) Update(msg tea.Msg) (HomeModel, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "tab":
-			if m.projectNameInput.Focused() {
-				m.projectNameInput.Blur()
-				m.outputFileInput.Focus()
-			} else if m.outputFileInput.Focused() {
-				m.outputFileInput.Blur()
+			if m.projectNameIn.Focused() {
+				m.projectNameIn.Blur()
+				m.outputFileIn.Focus()
+			} else if m.outputFileIn.Focused() {
+				m.outputFileIn.Blur()
 			} else {
-				m.projectNameInput.Focus()
+				m.projectNameIn.Focus()
 			}
 		}
 	}
 
-	m.projectNameInput, cmd = m.projectNameInput.Update(msg)
-	m.outputFileInput, cmd = m.outputFileInput.Update(msg)
+	m.projectNameIn, cmd = m.projectNameIn.Update(msg)
+	m.outputFileIn, cmd = m.outputFileIn.Update(msg)
 
 	return m, cmd
 }
 
-func (m homeModel) View() string {
+func (m HomeModel) View() string {
 	return fmt.Sprintf(
 		"Project Name: %s\nOutput File: %s\n\n",
-		m.projectNameInput.View(),
-		m.outputFileInput.View(),
+		m.projectNameIn.View(),
+		m.outputFileIn.View(),
 	)
 }

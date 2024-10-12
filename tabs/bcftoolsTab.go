@@ -3,23 +3,24 @@ package tabs
 import tea "github.com/charmbracelet/bubbletea"
 
 // Bcftools tab model
-type bcftoolsModel struct {
+type BcftoolsModel struct {
+	input, output string
 	// Add Bcftools-specific fields here
 }
 
-func initialBcftoolsModel() bcftoolsModel {
-	return bcftoolsModel{}
+func InitialBcftoolsModel() BcftoolsModel {
+	return BcftoolsModel{}
 }
 
-func (m bcftoolsModel) Init() tea.Cmd {
+func (m BcftoolsModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m bcftoolsModel) Update(msg tea.Msg) (bcftoolsModel, tea.Cmd) {
+func (m BcftoolsModel) Update(msg tea.Msg) (BcftoolsModel, tea.Cmd) {
 	// Add Bcftools-specific update logic here
 	return m, nil
 }
 
-func (m bcftoolsModel) View() string {
+func (m BcftoolsModel) View() string {
 	return "Bcftools tab content"
 }
