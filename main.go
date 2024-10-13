@@ -55,7 +55,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.nextTab):
 			m.activeTab = (m.activeTab + 1) % len(m.tabs)
 
-		case key.Matches(msg, m.keys.nextTab):
+		case key.Matches(msg, m.keys.prevTab):
 			m.activeTab = (m.activeTab - 1 + len(m.tabs)) % len(m.tabs)
 		}
 	}
@@ -80,12 +80,13 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m mainModel) View() string {
 
-	displayString := "\n"
+	titleStyle := lipgloss.NewStyle().Padding(0, 3).Foreground(lipgloss.Color("205")).Bold(true)
+	titleString := titleStyle.Render("VARCALL")
 
-	displayString += m.tabView()
+	displayString := ""
 
+	tabContentstyle := lipgloss.NewStyle().Padding(0, 3)
 	var tabContent string
-    tabContentstyle := lipgloss.NewStyle().Padding(0, 3)
 	switch m.activeTab {
 	case 0:
 		tabContent = m.homeTabModel.View()
@@ -97,13 +98,17 @@ func (m mainModel) View() string {
 		tabContent = m.homeTabModel.View()
 	}
 	helpView := lipgloss.NewStyle().Padding(0, 3).AlignVertical(lipgloss.Bottom).Render(m.help.View(m.keys))
-	displayString += fmt.Sprintf("\n\n%s\n\n%v", tabContentstyle.Render(tabContent), helpView)
+	displayString += fmt.Sprintf("\n%s\n\n%v\n\n%s\n\n%v",
+		titleString,
+		m.tabView(),
+		tabContentstyle.Render(tabContent),
+		helpView)
 
 	return displayString
 }
 
 func main() {
-	app := tea.NewProgram(initialMainModel(), tea.WithAltScreen())
+	app := tea.NewProgram(initialMainModel(), tea.WithAltScreen(), tea.WithMouseAllMotion())
 	_, err := app.Run()
 	if err != nil {
 		fmt.Printf("Error: %v", err)

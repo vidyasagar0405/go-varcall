@@ -5,7 +5,7 @@ import (
 )
 
 func (k keymaps) ShortHelp() []key.Binding {
-	return []key.Binding{k.quit}
+	return []key.Binding{k.quit, k.nextTab, k.prevTab}
 }
 
 // FullHelp returns keybindings for the expanded help view. It's part of the
