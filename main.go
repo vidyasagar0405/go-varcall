@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/vidyasagar0405/go-varcall/bcftools"
 	"github.com/vidyasagar0405/go-varcall/helptab"
 	"github.com/vidyasagar0405/go-varcall/home"
@@ -84,6 +85,7 @@ func (m mainModel) View() string {
 	displayString += m.tabView()
 
 	var tabContent string
+    tabContentstyle := lipgloss.NewStyle().Padding(0, 3)
 	switch m.activeTab {
 	case 0:
 		tabContent = m.homeTabModel.View()
@@ -94,8 +96,8 @@ func (m mainModel) View() string {
 	case 3:
 		tabContent = m.homeTabModel.View()
 	}
-	helpView := m.help.View(m.keys)
-	displayString += fmt.Sprintf("\n\n%s\n\n%v", tabContent, helpView)
+	helpView := lipgloss.NewStyle().Padding(0, 3).AlignVertical(lipgloss.Bottom).Render(m.help.View(m.keys))
+	displayString += fmt.Sprintf("\n\n%s\n\n%v", tabContentstyle.Render(tabContent), helpView)
 
 	return displayString
 }

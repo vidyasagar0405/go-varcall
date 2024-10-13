@@ -14,11 +14,11 @@ var Keys = keymaps{
 		key.WithHelp("q", "quit"),   // corresponding help text
 	),
 	nextTab: key.NewBinding(
-		key.WithKeys("tab"),             // actual keybindings
-		key.WithHelp("tab", "next tab"), // corresponding help text
+		key.WithKeys("ctrl+n"),             // actual keybindings
+		key.WithHelp("ctrl+n", "next tab"), // corresponding help text
 	),
 	prevTab: key.NewBinding(
-		key.WithKeys("shift+tab"),
-		key.WithHelp("shift+tab", "previous tab"),
+		key.WithKeys("ctrl+p"),
+		key.WithHelp("ctrl+p", "previous tab"),
 	),
 }

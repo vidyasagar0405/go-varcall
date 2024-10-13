@@ -15,3 +15,8 @@ func (m mainModel) tabView() string {
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Left, tabViews...)
 }
+
+
+type DefStyles struct{
+    defaultWithPadd lipgloss.Style
+}
