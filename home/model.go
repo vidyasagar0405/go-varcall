@@ -1,8 +1,11 @@
 package home
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 type Model struct {
 	keys keymaps
@@ -36,7 +39,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 
-	displayString := "\nBcftools\n"
+    headerString := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#6b53de"))
+
+    displayString := "\n"
+
+    displayString += fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n", headerString.Render("Project name: "),  headerString.Render("FastQC"), headerString.Render("Multiqc"), headerString.Render("BWA"))
 
 	return displayString
 }

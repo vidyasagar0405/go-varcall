@@ -95,7 +95,7 @@ func (m mainModel) View() string {
 	case 2:
 		tabContent = m.bcftoolsTabModel.View()
 	case 3:
-		tabContent = m.homeTabModel.View()
+		tabContent = m.helpTabModel.View()
 	}
 	helpView := lipgloss.NewStyle().Padding(0, 3).AlignVertical(lipgloss.Bottom).Render(m.help.View(m.keys))
 	displayString += fmt.Sprintf("\n%s\n\n%v\n\n%s\n\n%v",
