@@ -6,113 +6,87 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/vidyasagar0405/go-varcall/tabs"
+	"github.com/vidyasagar0405/go-varcall/bcftools"
+	"github.com/vidyasagar0405/go-varcall/helptab"
+	"github.com/vidyasagar0405/go-varcall/home"
+	"github.com/vidyasagar0405/go-varcall/samtools"
 )
 
-type errMsg error
-
-type model struct {
-	samtoolsTabModel tabs.SamtoolsModel
-	bcftoolsTabModel tabs.BcftoolsModel
-	help             help.Model
-	err              error
-	helpTabModel     tabs.HelpModel
-	state            tabs.SessionState
-	Keys             KeyMap
-	tabs             []string
-	homeTabModel     tabs.HomeModel
-	textInput        textinput.Model
-	spinner          spinner.Model
+type mainModel struct {
 	activeTab        int
+	tabs             []string
+	homeTabModel     home.Model
+	samtoolsTabModel samtools.Model
+	bcftoolsTabModel bcftools.Model
+	helpTabModel     helptab.Model
+	keys             keymaps
+	help             help.Model
 }
 
-func initialModel() model {
-	s := spinner.New()
-	s.Spinner = spinner.Points
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	return model{
-		samtoolsTabModel: tabs.InitialSamtoolsModel(),
-		bcftoolsTabModel: tabs.InitialBcftoolsModel(),
-		help:             help.New(),
-		err:              nil,
-		helpTabModel:     tabs.InitialHelpModel(),
-		state:            tabs.SessionState{},
-		Keys:             Keys,
-		tabs:             []string{"Home", "Samtools", "Bcftools", "Help"},
-		homeTabModel:     tabs.InitialHomeModel(),
-		textInput:        textinput.Model{},
-		spinner:          s,
+func initialMainModel() mainModel {
+	return mainModel{
 		activeTab:        0,
+		tabs:             []string{"Home", "Samtools", "Bcftools", "Help"},
+		homeTabModel:     home.InitialModel(),
+		samtoolsTabModel: samtools.InitialModel(),
+		bcftoolsTabModel: bcftools.InitialModel(),
+		helpTabModel:     helptab.InitialModel(),
+		keys:             Keys,
+		help:             help.New(),
 	}
 }
 
-func (m model) tabView() string {
-	var tabViews []string
-	for i, tab := range m.tabs {
-		style := lipgloss.NewStyle().Padding(0, 1, 0, 3)
-		if i == m.activeTab {
-			style = style.Bold(true).Foreground(lipgloss.Color("205"))
-		}
-		tabViews = append(tabViews, style.Render(tab))
-	}
-	return lipgloss.JoinHorizontal(lipgloss.Left, tabViews...)
+func (m mainModel) Init() tea.Cmd {
+	return nil
 }
 
-func (m model) Init() tea.Cmd {
-	return m.spinner.Tick
-}
+func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	cmd = nil
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.help.Width = msg.Width
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.Keys.quit):
-			return m, tea.Quit
-		case key.Matches(msg, m.Keys.nextTab):
-			m.activeTab = (m.activeTab + 1) % len(m.tabs)
-		case key.Matches(msg, m.Keys.prevTab):
-			m.activeTab = (m.activeTab - 1 + len(m.tabs)) % len(m.tabs)
-		case key.Matches(msg, m.Keys.Help):
-			m.help.ShowAll = !m.help.ShowAll
-		}
-	default:
-		var cmd tea.Cmd
-		m.spinner, cmd = m.spinner.Update(msg)
-		return m, cmd
+		case key.Matches(msg, m.keys.quit):
+			cmd = tea.Quit
 
+		case key.Matches(msg, m.keys.nextTab):
+			m.activeTab = (m.activeTab + 1) % len(m.tabs)
+
+		case key.Matches(msg, m.keys.prevTab):
+			m.activeTab = (m.activeTab - 1 + len(m.tabs)) % len(m.tabs)
+		}
 	}
 
-	var cmd tea.Cmd
+	var updatedModel tea.Model
 	switch m.activeTab {
 	case 0:
-		m.homeTabModel, cmd = m.homeTabModel.Update(msg)
-		m.state = m.homeTabModel.UpdateSessionState(m.state)
+		updatedModel, cmd = m.homeTabModel.Update(msg)
+		m.homeTabModel = updatedModel.(home.Model)
 	case 1:
-		m.samtoolsTabModel, cmd = m.samtoolsTabModel.Update(msg)
+		updatedModel, cmd = m.samtoolsTabModel.Update(msg)
+		m.samtoolsTabModel = updatedModel.(samtools.Model)
 	case 2:
-		m.bcftoolsTabModel, cmd = m.bcftoolsTabModel.Update(msg)
+		updatedModel, cmd = m.bcftoolsTabModel.Update(msg)
+		m.bcftoolsTabModel = updatedModel.(bcftools.Model)
 	case 3:
-		m.helpTabModel, cmd = m.helpTabModel.Update(msg)
+		updatedModel, cmd = m.helpTabModel.Update(msg)
+		m.helpTabModel = updatedModel.(helptab.Model)
 	}
 	return m, cmd
 }
 
-func (m model) View() string {
-	titleStyle := lipgloss.NewStyle().
-		MarginLeft(2).
-		Padding(1).
-		Bold(true).
-		Border(lipgloss.HiddenBorder(), false).
-		Foreground(lipgloss.Color("#F25D93")).
-		SetString("varcall")
+func (m mainModel) View() string {
 
-	tabContent := ""
+	titleStyle := lipgloss.NewStyle().Padding(0, 3).Foreground(lipgloss.Color("205")).Bold(true)
+	titleString := titleStyle.Render("VARCALL")
+
+	displayString := ""
+
+	tabContentstyle := lipgloss.NewStyle().Padding(0, 3)
+	var tabContent string
 	switch m.activeTab {
 	case 0:
 		tabContent = m.homeTabModel.View()
@@ -123,14 +97,21 @@ func (m model) View() string {
 	case 3:
 		tabContent = m.helpTabModel.View()
 	}
-	helpView := m.help.View(m.Keys)
-	return fmt.Sprintf("%v\n\n%s\n\n%s\n\n%v\n\n%v", titleStyle, m.tabView(), tabContent, m.spinner.View(), helpView)
+	helpView := lipgloss.NewStyle().Padding(0, 3).AlignVertical(lipgloss.Bottom).Render(m.help.View(m.keys))
+	displayString += fmt.Sprintf("\n%s\n\n%v\n\n%s\n\n%v",
+		titleString,
+		m.tabView(),
+		tabContentstyle.Render(tabContent),
+		helpView)
+
+	return displayString
 }
 
 func main() {
-	p := tea.NewProgram(initialModel(), tea.WithAltScreen(), tea.WithMouseAllMotion())
-	if _, err := p.Run(); err != nil {
-		fmt.Println(err)
+	app := tea.NewProgram(initialMainModel(), tea.WithAltScreen(), tea.WithMouseAllMotion())
+	_, err := app.Run()
+	if err != nil {
+		fmt.Printf("Error: %v", err)
 		os.Exit(1)
 	}
 }
